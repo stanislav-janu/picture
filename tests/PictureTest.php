@@ -14,17 +14,17 @@ class PictureTest extends TestCase
 	{
 		$picture = new Picture(__DIR__.'/pictures');
 		$file = '/dolphin-203875_1920.jpg';
-		$this->assertFalse($picture->isResized($file, 128));
+		$this->assertFalse($picture->isResize($file, 128));
 		$this->assertSame('/thumbnails/128x/3/n_733f3cd53bde51b539fc7be934aa764a.jpg', $picture->resize($file, 128));
-		$this->assertTrue($picture->isResized($file, 128));
+		$this->assertTrue($picture->isResize($file, 128));
 
-		$this->assertFalse($picture->isResized($file, 256, 2, Image::EXACT));
+		$this->assertFalse($picture->isResize($file, 256, 2, Image::EXACT));
 		$this->assertSame('/thumbnails/256x2/3/e_733f3cd53bde51b539fc7be934aa764a.jpg', $picture->resize($file, 256, 2, Image::EXACT));
-		$this->assertTrue($picture->isResized($file, 256, 2, Image::EXACT));
+		$this->assertTrue($picture->isResize($file, 256, 2, Image::EXACT));
 
-		$this->assertFalse($picture->isResized($file, null, 128));
+		$this->assertFalse($picture->isResize($file, null, 128));
 		$this->assertSame('/thumbnails/x128/3/n_733f3cd53bde51b539fc7be934aa764a.jpg', $picture->resize($file, null, 128));
-		$this->assertTrue($picture->isResized($file, null, 128));
+		$this->assertTrue($picture->isResize($file, null, 128));
 	}
 
 	public function testBlur()
