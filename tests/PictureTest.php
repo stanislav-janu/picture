@@ -9,6 +9,10 @@ use PHPUnit\Framework\TestCase;
 
 class PictureTest extends TestCase
 {
+	public function setUp()
+	{
+		ini_set('memory_limit', '64M');
+	}
 
 	public function testResize()
 	{

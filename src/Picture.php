@@ -262,9 +262,24 @@ class Picture
 	static function canResize(int $ow, int $oh, int $nw = null, int $nh = null, $throws = false) : bool
 	{
 		if($nh === null && $nh === null)
+		{
+			if($throws)
+				throw new PictureException('Must be filled width or height parameter.');
 			return false;
+		}
 
-		$memory_limit = 1024 * 1024 * ((int) ini_get('memory_limit') - self::MEMORY_RESERVE);
+		$imi = (int) ini_get('memory_limit');
+		if($imi <= 0)
+		{
+			if($throws)
+				throw new PictureException(sprintf(
+					'Available memory is %s MB.',
+					number_format($imi / 1024 / 1024,0)
+				));
+			return false;
+		}
+
+		$memory_limit = 1024 * 1024 * ($imi - self::MEMORY_RESERVE);
 		$constant = 3 * 1.8;
 
 		if($nh === null)
