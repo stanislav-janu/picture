@@ -1,0 +1,11 @@
+language: php
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+
+before_script:
+    - printf "\n" | pecl install imagick
+    - composer install --dev
+
+script: ./vendor/phpunit/phpunit/phpunit --configuration phpunit.xml

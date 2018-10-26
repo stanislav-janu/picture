@@ -1,0 +1,26 @@
+{
+	"name": "stanislav-janu/picture",
+	"description": "Helper for work with images.",
+	"homepage": "https://www.lweb.cz",
+	"license": ["MIT"],
+	"authors": [
+		{
+			"name": "Stanislav Janů",
+			"homepage": "http://lweb.cz"
+		}
+	],
+	"require": {
+		"php": ">=7.1.0",
+		"ext-gd": "*",
+		"ext-imagick": "*",
+		"nette/http": "^2.4",
+		"nette/utils": "^2.4"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^7"
+	},
+	"autoload": {
+		"classmap": ["src/"]
+	},
+	"minimum-stability": "stable"
+}
