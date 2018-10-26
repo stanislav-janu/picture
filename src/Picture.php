@@ -130,10 +130,10 @@ class Picture
 
 			list($ow, $oh) = getimagesize($mainFile);
 
-			if($flag === Image::EXACT && $width == null)
+			if($flag === Image::EXACT && $width === null)
 				$width = $ow;
 
-			if($flag === Image::EXACT && $height == null)
+			if($flag === Image::EXACT && $height === null)
 				$height = $oh;
 
 			if(( $ow <= $width || $oh <= $height ) && $flag !== Image::EXACT)
@@ -261,7 +261,7 @@ class Picture
 	 */
 	static function canResize(int $ow, int $oh, int $nw = null, int $nh = null, $throws = false) : bool
 	{
-		if($nh === null && $nh === null)
+		if($nw === null && $nh === null)
 		{
 			if($throws)
 				throw new PictureException('Must be filled width or height parameter.');
