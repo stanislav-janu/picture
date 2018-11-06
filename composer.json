@@ -12,9 +12,11 @@
 	"require": {
 		"php": ">=7.1.0",
 		"ext-gd": "*",
-		"ext-imagick": "*",
 		"nette/http": "^2.4",
 		"nette/utils": "^2.4"
+	},
+	"suggest": {
+		"ext-imagick": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^7"
