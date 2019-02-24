@@ -2,7 +2,7 @@
 	"name": "stanislav-janu/picture",
 	"description": "Helper for work with images.",
 	"homepage": "https://www.lweb.cz",
-	"license": ["MIT"],
+	"license": "MIT",
 	"authors": [
 		{
 			"name": "Stanislav Janů",
@@ -12,14 +12,14 @@
 	"require": {
 		"php": ">=7.1.0",
 		"ext-gd": "*",
-		"nette/http": "^2.4",
-		"nette/utils": "^2.4"
+		"nette/http": "^2.3 || ^3.0",
+		"nette/utils": "^2.3 || ^3.0"
 	},
 	"suggest": {
-		"ext-imagick": "*"
+		"ext-imagick": "to use Picture::blur()"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "^7"
+		"nette/tester": "^2.1"
 	},
 	"autoload": {
 		"classmap": ["src/"]
