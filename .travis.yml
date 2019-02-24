@@ -8,6 +8,6 @@ before_script:
     - pear config-set preferred_state beta
     - pecl channel-update pecl.php.net
     - yes | pecl install imagick
-    - composer install --dev
+    - composer install
 
-script: ./vendor/bin/tester tests
+script: vendor/bin/tester tests -C -s

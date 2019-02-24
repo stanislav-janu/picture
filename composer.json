@@ -16,7 +16,7 @@
 		"nette/utils": "^2.3 || ^3.0"
 	},
 	"suggest": {
-		"ext-imagick": "*"
+		"ext-imagick": "to use Picture::blur()"
 	},
 	"require-dev": {
 		"nette/tester": "^2.1"
