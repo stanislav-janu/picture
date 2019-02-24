@@ -5,7 +5,9 @@ php:
   - 7.3
 
 before_script:
-    - printf "\n" | pecl install imagick
+    - pear config-set preferred_state beta
+    - pecl channel-update pecl.php.net
+    - yes | pecl install imagick
     - composer install --dev
 
 script: ./vendor/bin/tester tests
