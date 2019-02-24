@@ -10,6 +10,7 @@ use Nette\Utils\Strings;
 use Nette\Utils\UnknownImageFileException;
 use Nette\InvalidArgumentException;
 
+
 /**
  * Class Picture
  * @package JCode
@@ -17,6 +18,9 @@ use Nette\InvalidArgumentException;
 class Picture
 {
 	private const MEMORY_RESERVE = 20; // MB
+
+	/** @var bool */
+	private $sharpenAfterResize = true;
 
 	/** @var string */
 	private $rootPath;
@@ -39,6 +43,14 @@ class Picture
 		$this->rootPath = $rootPath;
 		$this->reducedDir = $reducedDir;
 		$this->blurredDir = $blurredDir;
+	}
+
+	/**
+	 * @param bool $sharpenAfterResize
+	 */
+	public function setSharpenAfterResize(bool $sharpenAfterResize = true) : void
+	{
+		$this->sharpenAfterResize = $sharpenAfterResize;
 	}
 
 	/**
@@ -112,70 +124,78 @@ class Picture
 	{
 		$url = new Url($file);
 		$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
-		if(empty($extension))
+		if (empty($extension)) {
 			throw new PictureException('No file extension found.');
+		}
 
-		if($width === null && $height === null)
+		if ($width === null && $height === null) {
 			throw new PictureException('Must be filled width or height parameter.');
+		}
 
 		$settings = $this->settings($file, $extension, $width, $height, $flag);
 
-		if(!file_exists($settings['file']))
-		{
+		if (!file_exists($settings['file'])) {
 			$mainFile = $this->rootPath.$file;
-			if(Strings::substring(Strings::lower($file), 0, 4) == "http")
+			if (Strings::substring(Strings::lower($file), 0, 4) == "http") {
 				$mainFile = $file;
-			elseif(!file_exists($mainFile))
+			} elseif (!file_exists($mainFile)) {
 				throw new PictureException('File is not exists.');
+			}
 
 			list($ow, $oh) = getimagesize($mainFile);
 
-			if($flag === Image::EXACT && $width === null)
+			if ($flag === Image::EXACT && $width === null) {
 				$width = $ow;
+			}
 
-			if($flag === Image::EXACT && $height === null)
+			if ($flag === Image::EXACT && $height === null) {
 				$height = $oh;
+			}
 
-			if(( $ow <= $width || $oh <= $height ) && $flag !== Image::EXACT)
+			if (($ow <= $width || $oh <= $height) && $flag !== Image::EXACT) {
 				return $file;
+			}
 
 			Picture::canResize($ow, $oh, $width, $height, true);
 
-			if(!is_dir($settings['dir']))
+			if (!is_dir($settings['dir'])) {
 				FileSystem::createDir($settings['dir']);
+			}
 
 			try {
 				$image = Image::fromFile($mainFile);
 				$image->resize($width, $height, $flag);
-				$image->sharpen();
 
-				if(in_array($extension, ['jpg', 'jpeg']))
-					imageinterlace($image->getImageResource(), 1); // Progressive JPEG
+				if ($this->sharpenAfterResize) {
+					$image->sharpen();
+				}
+
+				if (in_array($extension, ['jpg', 'jpeg'])) {
+					imageinterlace($image->getImageResource(), 1);
+				} // Progressive JPEG
 
 				$iw = $image->getWidth();
 				$quality = 85;
-				if($iw >= 1024)
+				if ($iw >= 1024) {
 					$quality = 75;
-				if($iw >= 1920)
+				}
+				if ($iw >= 1920) {
 					$quality = 65;
-				if($iw >= 2560)
+				}
+				if ($iw >= 2560) {
 					$quality = 50;
+				}
 
 				$image->save($settings['file'], $quality);
-			}
-			catch (UnknownImageFileException $e)
-			{
+			} catch (UnknownImageFileException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
-			}
-			catch (ImageException $e)
-			{
+			} catch (ImageException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
-			}
-			catch (InvalidArgumentException $e)
-			{
+			} catch (InvalidArgumentException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 		}
+
 		return $settings['fileUri'];
 	}
 
@@ -188,64 +208,64 @@ class Picture
 	 */
 	public function blur(string $file, int $depth = 10) : string
 	{
-		if(!class_exists('Imagick'))
+		if (!class_exists('Imagick')) {
 			throw new PictureException('For blurring images is required ext-imagick.');
+		}
 
 		$url = new Url($file);
 		$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
-		if(empty($extension))
+		if (empty($extension)) {
 			throw new PictureException('No file extension found.');
+		}
 
 		$settings = $this->blurSettings($file, $extension, $depth);
 
-		if(!file_exists($settings['file']))
-		{
+		if (!file_exists($settings['file'])) {
 			$mainFile = $this->rootPath.$file;
-			if(Strings::substring(Strings::lower($file), 0, 4) == "http")
+			if (Strings::substring(Strings::lower($file), 0, 4) == "http") {
 				$mainFile = $file;
-			elseif(!file_exists($mainFile))
+			} elseif (!file_exists($mainFile)) {
 				throw new PictureException('File is not exists.');
+			}
 
-			if(!is_dir($settings['dir']))
+			if (!is_dir($settings['dir'])) {
 				FileSystem::createDir($settings['dir']);
+			}
 
 			try {
 				$image = Image::fromFile($mainFile);
 
-				if(in_array($extension, ['jpg', 'jpeg']))
-					imageinterlace($image->getImageResource(), 1); // Progressive JPEG
+				if (in_array($extension, ['jpg', 'jpeg'])) {
+					imageinterlace($image->getImageResource(), 1);
+				} // Progressive JPEG
 
 				$iw = $image->getWidth();
 				$quality = 70;
-				if($iw >= 1920)
+				if ($iw >= 1920) {
 					$quality = 60;
-				if($iw >= 2560)
+				}
+				if ($iw >= 2560) {
 					$quality = 50;
+				}
 
 				$image->save($settings['file'], $quality);
 
 				$image = new \Imagick($settings['file']);
-				for($x=1;$x<=$depth;$x++)
-					$image->blurImage(10,3);
+				for ($x = 1; $x <= $depth; $x++) {
+					$image->blurImage(10, 3);
+				}
 				$image->writeImage($settings['file']);
-			}
-			catch (UnknownImageFileException $e)
-			{
+			} catch (UnknownImageFileException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
-			}
-			catch (ImageException $e)
-			{
+			} catch (ImageException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
-			}
-			catch (InvalidArgumentException $e)
-			{
+			} catch (InvalidArgumentException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
-			}
-			catch (\ImagickException $e)
-			{
+			} catch (\ImagickException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 		}
+
 		return $settings['fileUri'];
 	}
 
@@ -261,44 +281,42 @@ class Picture
 	 */
 	static function canResize(int $ow, int $oh, int $nw = null, int $nh = null, $throws = false) : bool
 	{
-		if($nw === null && $nh === null)
-		{
-			if($throws)
+		if ($nw === null && $nh === null) {
+			if ($throws) {
 				throw new PictureException('Must be filled width or height parameter.');
+			}
+
 			return false;
 		}
 
 		$imi = (int) ini_get('memory_limit');
-		if($imi <= 0)
-		{
-			if($throws)
-				throw new PictureException(sprintf(
-					'Available memory is %s MB.',
-					number_format($imi / 1024 / 1024,0)
-				));
+		if ($imi <= 0) {
+			if ($throws) {
+				throw new PictureException(sprintf('Available memory is %s MB.', number_format($imi / 1024 / 1024, 0)));
+			}
+
 			return false;
 		}
 
 		$memory_limit = 1024 * 1024 * ($imi - self::MEMORY_RESERVE);
 		$constant = 3 * 1.8;
 
-		if($nh === null)
+		if ($nh === null) {
 			$nh = $nw * ($oh / $ow);
+		}
 
-		if($nw === null)
+		if ($nw === null) {
 			$nw = $nh * ($ow / $oh);
+		}
 
 		$original_memory = $ow * $oh * $constant;
 		$resize_memory = $nw * $nh * $constant;
 
 		$need_memory = $original_memory + $resize_memory;
 
-		if($throws && $memory_limit < $need_memory)
-			throw new PictureException(sprintf(
-				'Available memory is %s MB and needed memory is %s MB.',
-				number_format($memory_limit / 1024 / 1024,0),
-				number_format($need_memory / 1024 / 1024,0)
-			));
+		if ($throws && $memory_limit < $need_memory) {
+			throw new PictureException(sprintf('Available memory is %s MB and needed memory is %s MB.', number_format($memory_limit / 1024 / 1024, 0), number_format($need_memory / 1024 / 1024, 0)));
+		}
 
 		return $memory_limit >= $need_memory;
 	}
@@ -315,8 +333,9 @@ class Picture
 	{
 		$url = new Url($file);
 		$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
-		if(!empty($extension))
+		if (!empty($extension)) {
 			return file_exists($this->settings($file, $extension, $width, $height, $flag)['file']);
+		}
 
 		return false;
 	}
@@ -331,8 +350,9 @@ class Picture
 	{
 		$url = new Url($file);
 		$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
-		if(!empty($extension))
+		if (!empty($extension)) {
 			return file_exists($this->blurSettings($file, $extension, $depth)['file']);
+		}
 
 		return false;
 	}
