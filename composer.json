@@ -19,10 +19,10 @@
 		"ext-imagick": "*"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "^7"
+		"nette/tester": "^2.1"
 	},
 	"autoload": {
 		"classmap": ["src/"]
 	},
-	"minimum-stability": "dev"
+	"minimum-stability": "stable"
 }

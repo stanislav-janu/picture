@@ -8,4 +8,4 @@ before_script:
     - printf "\n" | pecl install imagick
     - composer install --dev
 
-script: ./vendor/phpunit/phpunit/phpunit --configuration phpunit.xml
+script: ./vendor/bin/tester tests
