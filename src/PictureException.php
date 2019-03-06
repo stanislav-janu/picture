@@ -1,5 +1,8 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace JCode;
 
-class PictureException extends \Exception {}
+class PictureException extends \Exception
+{
+}
