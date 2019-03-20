@@ -120,23 +120,34 @@ class Picture
 
 
 	/**
-	 * @param string   $file
-	 * @param int|null $width
-	 * @param int|null $height
-	 * @param int      $flag
+	 * @param string      $file
+	 * @param int|null    $width
+	 * @param int|null    $height
+	 * @param int         $flag
+	 * @param string|null $outputFormat
 	 *
 	 * @return string
 	 * @throws \JCode\PictureException
 	 */
-	public function resize(string $file, int $width = null, int $height = null, int $flag = Image::FIT): string
+	public function resize(string $file, int $width = null, int $height = null, int $flag = Image::FIT, ?string $outputFormat = null): string
 	{
 		$url = new Url($file);
-		$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
-		if (Strings::length($extension) === 0) {
-			throw new PictureException('No file extension found.');
+		if ($outputFormat === null) {
+			$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
+			if (Strings::length($extension) === 0) {
+				throw new PictureException('No file extension found.');
+			}
+		} else {
+			$extension = $outputFormat;
 		}
 
+		$extension = Strings::lower($extension);
+
 		if ($width === null && $height === null) {
+			throw new PictureException('Must be filled width or height parameter.');
+		}
+
+		if (!in_array($extension, ['jpg', 'png', 'jpeg', 'webp', 'gif'], true)) {
 			throw new PictureException('Must be filled width or height parameter.');
 		}
 
@@ -194,7 +205,17 @@ class Picture
 					$quality = 50;
 				}
 
-				$image->save($settings['file'], $quality);
+				if ($extension === 'png') {
+					$type = Image::PNG;
+				} elseif ($extension === 'gif') {
+					$type = Image::GIF;
+				} elseif ($extension === 'webp') {
+					$type = Image::WEBP;
+				} else {
+					$type = Image::JPEG;
+				}
+
+				$image->save($settings['file'], $quality, $type);
 			} catch (UnknownImageFileException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
 			} catch (ImageException $e) {
@@ -349,17 +370,26 @@ class Picture
 
 
 	/**
-	 * @param string   $file
-	 * @param int|null $width
-	 * @param int|null $height
-	 * @param int      $flag
+	 * @param string      $file
+	 * @param int|null    $width
+	 * @param int|null    $height
+	 * @param int         $flag
+	 * @param string|null $outputFormat
 	 *
 	 * @return bool
 	 */
-	public function isResize(string $file, int $width = null, int $height = null, int $flag = Image::FIT): bool
+	public function isResize(string $file, int $width = null, int $height = null, int $flag = Image::FIT, ?string $outputFormat = null): bool
 	{
 		$url = new Url($file);
-		$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
+		if ($outputFormat === null) {
+			$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
+			if (Strings::length($extension) === 0) {
+				return false;
+			}
+		} else {
+			$extension = $outputFormat;
+		}
+		$extension = Strings::lower($extension);
 		if (Strings::length($extension) > 1) {
 			return file_exists($this->settings($file, $extension, $width, $height, $flag)['file']);
 		}
