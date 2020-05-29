@@ -154,9 +154,11 @@ class Picture
 		$settings = $this->settings($file, $extension, $width, $height, $flag);
 
 		if (!file_exists($settings['file'])) {
+			$isUrl = false;
 			$mainFile = $this->rootPath . $file;
-			if (Strings::substring(Strings::lower($file), 0, 4) == 'http') {
+			if (Strings::substring(Strings::lower($file), 0, 4) === 'http') {
 				$mainFile = $file;
+				$isUrl = true;
 			} elseif (!file_exists($mainFile)) {
 				throw new PictureException('File is not exists.');
 			}
@@ -172,7 +174,12 @@ class Picture
 			}
 
 			if (($ow <= $width || $oh <= $height) && $flag !== Image::EXACT) {
-				return $file;
+				if ($isUrl) {
+					FileSystem::copy($file, $settings['file']);
+					return $settings['fileUri'];
+				} else {
+					return $file;
+				}
 			}
 
 			self::canResize($ow, $oh, $width, $height, true);
