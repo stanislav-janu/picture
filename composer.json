@@ -20,7 +20,7 @@
 		"ext-imagick": "to use Picture::blur()"
 	},
 	"scripts": {
-		"t": "vendor/bin/tester tests",
+		"t": "vendor/bin/tester tests -C",
 		"sa": "docker run --rm -v $PWD:/app phpstan/phpstan analyse src -l max --memory-limit=512M --ansi",
 		"cs-i": "composer create-project nette/coding-standard temp/nette-coding-standard",
 		"cs-t": "temp/nette-coding-standard/ecs check src tests --config temp/nette-coding-standard/coding-standard-php71.yml --ansi",
