@@ -12,26 +12,23 @@
 	"require": {
 		"php": ">=7.1.0",
 		"ext-gd": "*",
-		"nette/http": "^2.3 || ^3.0",
-		"nette/utils": "^2.3 || ^3.0",
-		"thecodingmachine/safe": "^0.1.13"
+		"nette/http": "^3.0",
+		"nette/utils": "^3.1",
+		"thecodingmachine/safe": "^1.0"
 	},
 	"suggest": {
 		"ext-imagick": "to use Picture::blur()"
 	},
 	"scripts": {
 		"t": "vendor/bin/tester tests",
-		"sa": "vendor/bin/phpstan analyse src -l 7",
-		"cs-t": "temp/nette-coding-standard/ecs check src tests --config temp/nette-coding-standard/coding-standard-php71.yml",
-		"cs-f": "temp/nette-coding-standard/ecs check src tests --config temp/nette-coding-standard/coding-standard-php71.yml --fix"
+		"sa": "docker run --rm -v $PWD:/app phpstan/phpstan analyse src -l max --memory-limit=512M --ansi",
+		"cs-i": "composer create-project nette/coding-standard temp/nette-coding-standard",
+		"cs-t": "temp/nette-coding-standard/ecs check src tests --config temp/nette-coding-standard/coding-standard-php71.yml --ansi",
+		"cs-f": "temp/nette-coding-standard/ecs check src tests --config temp/nette-coding-standard/coding-standard-php71.yml --fix --ansi"
 	},
 	"require-dev": {
-		"phpstan/phpstan": "^0.11",
-		"phpstan/phpstan-nette": "^0.11",
-		"phpstan/phpstan-deprecation-rules": "^0.11.0",
-		"phpstan/phpstan-strict-rules": "^0.11.0",
-		"thecodingmachine/phpstan-safe-rule": "dev-master",
-		"nette/tester": "^2.1"
+		"stanislav-janu/phpstan": "^v0.12",
+		"nette/tester": "^2.3"
 	},
 	"autoload": {
 		"classmap": ["src/"]

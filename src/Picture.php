@@ -11,6 +11,8 @@ use Nette\Utils\ImageException;
 use Nette\Utils\Strings;
 use Nette\Utils\UnknownImageFileException;
 use Safe\Exceptions\StringsException;
+use function Safe\getimagesize;
+use function Safe\ini_get;
 use function Safe\sprintf;
 
 
@@ -66,7 +68,7 @@ class Picture
 	 * @param int|null $height
 	 * @param int      $flag
 	 *
-	 * @return array
+	 * @return array<string>
 	 */
 	private function settings(string $file, string $extension, int $width = null, int $height = null, int $flag = Image::FIT): array
 	{
@@ -99,7 +101,7 @@ class Picture
 	 * @param string $extension
 	 * @param int    $depth
 	 *
-	 * @return array
+	 * @return array<string>
 	 */
 	private function blurSettings(string $file, string $extension, int $depth): array
 	{
@@ -163,7 +165,11 @@ class Picture
 				throw new PictureException('File is not exists.');
 			}
 
-			[$ow, $oh] = getimagesize($mainFile);
+			try {
+				[$ow, $oh] = getimagesize($mainFile);
+			} catch (\Safe\Exceptions\ImageException $e) {
+				throw new PictureException($e->getMessage(), 0, $e);
+			}
 
 			if ($flag === Image::EXACT && $width === null) {
 				$width = $ow;
@@ -196,8 +202,9 @@ class Picture
 					$image->sharpen();
 				}
 
-				if (in_array($extension, ['jpg', 'jpeg'], true)) {
-					imageinterlace($image->getImageResource(), 1);
+				$resource = $image->getImageResource();
+				if (in_array($extension, ['jpg', 'jpeg'], true) && is_resource($resource)) {
+					imageinterlace($resource, 1);
 				} // Progressive JPEG
 
 				$iw = $image->getWidth();
@@ -272,8 +279,9 @@ class Picture
 			try {
 				$image = Image::fromFile($mainFile);
 
-				if (in_array($extension, ['jpg', 'jpeg'], true)) {
-					imageinterlace($image->getImageResource(), 1);
+				$resource = $image->getImageResource();
+				if (in_array($extension, ['jpg', 'jpeg'], true) && is_resource($resource)) {
+					imageinterlace($resource, 1);
 				} // Progressive JPEG
 
 				$iw = $image->getWidth();
@@ -289,9 +297,9 @@ class Picture
 
 				$image = new \Imagick($settings['file']);
 				for ($x = 1; $x <= $depth; $x++) {
-					$image->blurimage(10, 3);
+					$image->blurImage(10, 3);
 				}
-				$image->writeimage($settings['file']);
+				$image->writeImage($settings['file']);
 			} catch (UnknownImageFileException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
 			} catch (ImageException $e) {
