@@ -1,8 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
-namespace JCode;
+namespace JanuSoftware;
 
+use GdImage;
+use Imagick;
+use ImagickException;
 use Nette\Http\Url;
 use Nette\InvalidArgumentException;
 use Nette\Utils\FileSystem;
@@ -18,43 +22,23 @@ use function Safe\sprintf;
 
 /**
  * Class Picture
- * @package JCode
+ * @package JanuSoftware
  */
 class Picture
 {
 	private const MEMORY_RESERVE = 20; // MB
 
-	/** @var bool */
-	private $sharpenAfterResize = true;
-
-	/** @var string */
-	private $rootPath;
-
-	/** @var string */
-	private $reducedDir;
-
-	/** @var string */
-	private $blurredDir;
+	private bool $sharpenAfterResize = true;
 
 
-	/**
-	 * Picture constructor.
-	 *
-	 * @param string $rootPath
-	 * @param string $reducedDir
-	 * @param string $blurredDir
-	 */
-	public function __construct(string $rootPath, string $reducedDir = '/thumbnails', string $blurredDir = '/blurred')
-	{
-		$this->rootPath = $rootPath;
-		$this->reducedDir = $reducedDir;
-		$this->blurredDir = $blurredDir;
+	public function __construct(
+		private string $rootPath,
+		private string $reducedDir = '/thumbnails',
+		private string $blurredDir = '/blurred',
+	) {
 	}
 
 
-	/**
-	 * @param bool $sharpenAfterResize
-	 */
 	public function setSharpenAfterResize(bool $sharpenAfterResize = true): void
 	{
 		$this->sharpenAfterResize = $sharpenAfterResize;
@@ -62,16 +46,15 @@ class Picture
 
 
 	/**
-	 * @param string   $file
-	 * @param string   $extension
-	 * @param int|null $width
-	 * @param int|null $height
-	 * @param int      $flag
-	 *
 	 * @return array<string>
 	 */
-	private function settings(string $file, string $extension, int $width = null, int $height = null, int $flag = Image::FIT): array
-	{
+	private function settings(
+		string $file,
+		string $extension,
+		?int $width = null,
+		?int $height = null,
+		int $flag = Image::FIT,
+	): array {
 		$prefixes = [
 			Image::EXACT => 'e',
 			Image::FIT => 'n',
@@ -97,10 +80,6 @@ class Picture
 
 
 	/**
-	 * @param string $file
-	 * @param string $extension
-	 * @param int    $depth
-	 *
 	 * @return array<string>
 	 */
 	private function blurSettings(string $file, string $extension, int $depth): array
@@ -122,17 +101,15 @@ class Picture
 
 
 	/**
-	 * @param string      $file
-	 * @param int|null    $width
-	 * @param int|null    $height
-	 * @param int         $flag
-	 * @param string|null $outputFormat
-	 *
-	 * @return string
-	 * @throws \JCode\PictureException
+	 * @throws PictureException
 	 */
-	public function resize(string $file, int $width = null, int $height = null, int $flag = Image::FIT, ?string $outputFormat = null): string
-	{
+	public function resize(
+		string $file,
+		?int $width = null,
+		?int $height = null,
+		int $flag = Image::FIT,
+		?string $outputFormat = null,
+	): string {
 		$url = new Url($file);
 		if ($outputFormat === null) {
 			$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
@@ -203,8 +180,8 @@ class Picture
 				}
 
 				$resource = $image->getImageResource();
-				if (in_array($extension, ['jpg', 'jpeg'], true) && is_resource($resource)) {
-					imageinterlace($resource, 1);
+				if (in_array($extension, ['jpg', 'jpeg'], true) && $resource instanceof GdImage) {
+					imageinterlace($resource, true);
 				} // Progressive JPEG
 
 				$iw = $image->getWidth();
@@ -230,11 +207,7 @@ class Picture
 				}
 
 				$image->save($settings['file'], $quality, $type);
-			} catch (UnknownImageFileException $e) {
-				throw new PictureException($e->getMessage(), 0, $e);
-			} catch (ImageException $e) {
-				throw new PictureException($e->getMessage(), 0, $e);
-			} catch (InvalidArgumentException $e) {
+			} catch (UnknownImageFileException|ImageException|InvalidArgumentException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 		}
@@ -244,11 +217,7 @@ class Picture
 
 
 	/**
-	 * @param string $file
-	 * @param int    $depth
-	 *
-	 * @return string
-	 * @throws \JCode\PictureException
+	 * @throws PictureException
 	 */
 	public function blur(string $file, int $depth = 10): string
 	{
@@ -280,8 +249,8 @@ class Picture
 				$image = Image::fromFile($mainFile);
 
 				$resource = $image->getImageResource();
-				if (in_array($extension, ['jpg', 'jpeg'], true) && is_resource($resource)) {
-					imageinterlace($resource, 1);
+				if (in_array($extension, ['jpg', 'jpeg'], true) && $resource instanceof GdImage) {
+					imageinterlace($resource, true);
 				} // Progressive JPEG
 
 				$iw = $image->getWidth();
@@ -295,18 +264,12 @@ class Picture
 
 				$image->save($settings['file'], $quality);
 
-				$image = new \Imagick($settings['file']);
+				$image = new Imagick($settings['file']);
 				for ($x = 1; $x <= $depth; $x++) {
 					$image->blurImage(10, 3);
 				}
 				$image->writeImage($settings['file']);
-			} catch (UnknownImageFileException $e) {
-				throw new PictureException($e->getMessage(), 0, $e);
-			} catch (ImageException $e) {
-				throw new PictureException($e->getMessage(), 0, $e);
-			} catch (InvalidArgumentException $e) {
-				throw new PictureException($e->getMessage(), 0, $e);
-			} catch (\ImagickException $e) {
+			} catch (UnknownImageFileException|ImagickException|InvalidArgumentException|ImageException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 		}
@@ -316,16 +279,9 @@ class Picture
 
 
 	/**
-	 * @param int      $ow
-	 * @param int      $oh
-	 * @param int|null $nw
-	 * @param int|null $nh
-	 * @param bool     $throws
-	 *
-	 * @return bool
-	 * @throws \JCode\PictureException
+	 * @throws PictureException
 	 */
-	public static function canResize(int $ow, int $oh, int $nw = null, int $nh = null, $throws = false): bool
+	public static function canResize(int $ow, int $oh, int $nw = null, int $nh = null, bool $throws = false): bool
 	{
 		try {
 			if ($nw === null && $nh === null) {
@@ -337,6 +293,11 @@ class Picture
 			}
 
 			$imi = (int) ini_get('memory_limit');
+
+			if ($imi === -1) {
+				return true;
+			}
+
 			if ($imi <= 0) {
 				if ($throws) {
 					throw new PictureException(sprintf('Available memory is %s MB.', number_format($imi / 1024 / 1024, 0)));
@@ -348,20 +309,10 @@ class Picture
 			$memory_limit = 1024 * 1024 * ($imi - self::MEMORY_RESERVE);
 			$constant = 3 * 1.8;
 
-			if ($nh === null && $nw !== null) {
+			if ($nw !== null) {
 				$nh = $nw * ($oh / $ow);
-			}
-
-			if ($nw === null && $nh !== null) {
+			} else {
 				$nw = $nh * ($ow / $oh);
-			}
-
-			if ($nw === null || $nh === null) {
-				if ($throws) {
-					throw new PictureException('Is impossible to count new width or height parameter.');
-				}
-
-				return false;
 			}
 
 			$original_memory = $ow * $oh * $constant;
@@ -375,26 +326,18 @@ class Picture
 
 			return $memory_limit >= $need_memory;
 		} catch (StringsException $exception) {
-			if ($throws) {
-				throw new PictureException($exception->getMessage(), $exception->getCode(), $exception);
-			}
-
-			return false;
+			throw new PictureException($exception->getMessage(), $exception->getCode(), $exception);
 		}
 	}
 
 
-	/**
-	 * @param string      $file
-	 * @param int|null    $width
-	 * @param int|null    $height
-	 * @param int         $flag
-	 * @param string|null $outputFormat
-	 *
-	 * @return bool
-	 */
-	public function isResize(string $file, int $width = null, int $height = null, int $flag = Image::FIT, ?string $outputFormat = null): bool
-	{
+	public function isResize(
+		string $file,
+		?int $width = null,
+		?int $height = null,
+		int $flag = Image::FIT,
+		?string $outputFormat = null,
+	): bool {
 		$url = new Url($file);
 		if ($outputFormat === null) {
 			$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
@@ -413,12 +356,6 @@ class Picture
 	}
 
 
-	/**
-	 * @param string $file
-	 * @param int    $depth
-	 *
-	 * @return bool
-	 */
 	public function isBlurred(string $file, int $depth = 10): bool
 	{
 		$url = new Url($file);

@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
-namespace JCode;
+namespace JanuSoftware;
 
-class PictureException extends \Exception
+use Exception;
+class PictureException extends Exception
 {
 }

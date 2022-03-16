@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use JCode\Picture;
+use JanuSoftware\Picture;
 use Nette\Utils\FileSystem;
 use Tester\Assert;
 

@@ -1,0 +1,44 @@
+name: Nette Tester
+
+on:
+  push:
+    branches: [ master ]
+  pull_request: null
+
+jobs:
+  tester:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:latest
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306/tcp
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=10
+    strategy:
+      matrix:
+        php: [ '8.0', '8.1' ]
+    name: PHP ${{ matrix.php }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Start mysql service
+        run: sudo systemctl start mysql
+
+      - name: Create db
+        run: mysql -u root -proot -e 'CREATE DATABASE IF NOT EXISTS test;'
+
+      - name: Composer install
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Run tests
+        run: vendor/bin/tester tests -C -s
