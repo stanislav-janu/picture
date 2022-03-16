@@ -14,10 +14,8 @@ use Nette\Utils\Image;
 use Nette\Utils\ImageException;
 use Nette\Utils\Strings;
 use Nette\Utils\UnknownImageFileException;
-use Safe\Exceptions\StringsException;
 use function Safe\getimagesize;
 use function Safe\ini_get;
-use function Safe\sprintf;
 
 
 /**
@@ -283,51 +281,47 @@ class Picture
 	 */
 	public static function canResize(int $ow, int $oh, int $nw = null, int $nh = null, bool $throws = false): bool
 	{
-		try {
-			if ($nw === null && $nh === null) {
-				if ($throws) {
-					throw new PictureException('Must be filled width or height parameter.');
-				}
-
-				return false;
+		if ($nw === null && $nh === null) {
+			if ($throws) {
+				throw new PictureException('Must be filled width or height parameter.');
 			}
 
-			$imi = (int) ini_get('memory_limit');
-
-			if ($imi === -1) {
-				return true;
-			}
-
-			if ($imi <= 0) {
-				if ($throws) {
-					throw new PictureException(sprintf('Available memory is %s MB.', number_format($imi / 1024 / 1024, 0)));
-				}
-
-				return false;
-			}
-
-			$memory_limit = 1024 * 1024 * ($imi - self::MEMORY_RESERVE);
-			$constant = 3 * 1.8;
-
-			if ($nw !== null) {
-				$nh = $nw * ($oh / $ow);
-			} else {
-				$nw = $nh * ($ow / $oh);
-			}
-
-			$original_memory = $ow * $oh * $constant;
-			$resize_memory = $nw * $nh * $constant;
-
-			$need_memory = $original_memory + $resize_memory;
-
-			if ($throws && $memory_limit < $need_memory) {
-				throw new PictureException(sprintf('Available memory is %s MB and needed memory is %s MB.', number_format($memory_limit / 1024 / 1024, 0), number_format($need_memory / 1024 / 1024, 0)));
-			}
-
-			return $memory_limit >= $need_memory;
-		} catch (StringsException $exception) {
-			throw new PictureException($exception->getMessage(), $exception->getCode(), $exception);
+			return false;
 		}
+
+		$imi = (int) ini_get('memory_limit');
+
+		if ($imi === -1) {
+			return true;
+		}
+
+		if ($imi <= 0) {
+			if ($throws) {
+				throw new PictureException(sprintf('Available memory is %s MB.', number_format($imi / 1024 / 1024, 0)));
+			}
+
+			return false;
+		}
+
+		$memory_limit = 1024 * 1024 * ($imi - self::MEMORY_RESERVE);
+		$constant = 3 * 1.8;
+
+		if ($nw !== null) {
+			$nh = $nw * ($oh / $ow);
+		} else {
+			$nw = $nh * ($ow / $oh);
+		}
+
+		$original_memory = $ow * $oh * $constant;
+		$resize_memory = $nw * $nh * $constant;
+
+		$need_memory = $original_memory + $resize_memory;
+
+		if ($throws && $memory_limit < $need_memory) {
+			throw new PictureException(sprintf('Available memory is %s MB and needed memory is %s MB.', number_format($memory_limit / 1024 / 1024, 0), number_format($need_memory / 1024 / 1024, 0)));
+		}
+
+		return $memory_limit >= $need_memory;
 	}
 
 

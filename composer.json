@@ -15,7 +15,7 @@
 
 		"nette/http": "^3.0",
 		"nette/utils": "^3.1",
-		"thecodingmachine/safe": "^1.0"
+		"thecodingmachine/safe": "^2.0"
 	},
 	"suggest": {
 		"ext-imagick": "to use Picture::blur()"
