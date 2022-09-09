@@ -132,7 +132,7 @@ class Picture
 
 		if (!file_exists($settings['file'])) {
 			$isUrl = false;
-			$mainFile = $this->rootPath . $file;
+			$mainFile = $this->rootPath . urldecode($file);
 			if (Strings::substring(Strings::lower($file), 0, 4) === 'http') {
 				$mainFile = $file;
 				$isUrl = true;
