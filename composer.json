@@ -25,8 +25,8 @@
 		"sa": "vendor/bin/phpstan.phar analyse --memory-limit=512M --ansi",
 		"sap": "vendor/bin/phpstan.phar analyse --memory-limit=512M --ansi --pro",
 		"sacc": "vendor/bin/phpstan.phar clear-result-cache",
-		"r": "vendor/bin/rector process --config rector.php --dry-run --ansi",
-		"r-f": "vendor/bin/rector process --config rector.php --ansi",
+		"re": "vendor/bin/rector process --config rector.php --dry-run --ansi",
+		"re-f": "vendor/bin/rector process --config rector.php --ansi",
 		"cs-i": "rm -rf temp/nette-coding-standard && composer create-project nette/coding-standard temp/nette-coding-standard",
 		"cs": "PHP_CS_FIXER_IGNORE_ENV=1 php -d memory_limit=512M temp/nette-coding-standard/ecs check src tests --preset php80",
 		"cs-f": "PHP_CS_FIXER_IGNORE_ENV=1 php -d memory_limit=512M temp/nette-coding-standard/ecs check src tests --preset php80 --fix"
@@ -34,7 +34,7 @@
 	"require-dev": {
 		"stanislav-janu/phpstan": "^v1.0",
 		"nette/tester": "^2.3",
-		"rector/rector": "^0.12"
+		"rector/rector": "^0.14"
 	},
 	"autoload": {
 		"classmap": ["src/"]
