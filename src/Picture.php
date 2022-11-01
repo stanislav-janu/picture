@@ -124,8 +124,8 @@ class Picture
 			throw new PictureException('Must be filled width or height parameter.');
 		}
 
-		if (!in_array($extension, ['jpg', 'png', 'jpeg', 'webp', 'gif'], true)) {
-			throw new PictureException('Must be filled width or height parameter.');
+		if (!in_array($extension, ['jpg', 'png', 'jpeg', 'webp', 'gif', 'jfif'], true)) {
+			throw new PictureException('Extension ' . $extension . ' is not allowed.');
 		}
 
 		$settings = $this->settings($file, $extension, $width, $height, $flag);
