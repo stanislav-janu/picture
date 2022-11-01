@@ -20,7 +20,6 @@ use function Safe\ini_get;
 
 /**
  * Class Picture
- * @package JanuSoftware
  */
 class Picture
 {
@@ -52,7 +51,8 @@ class Picture
 		?int $width = null,
 		?int $height = null,
 		int $flag = Image::FIT,
-	): array {
+	): array
+	{
 		$prefixes = [
 			Image::EXACT => 'e',
 			Image::FIT => 'n',
@@ -107,7 +107,8 @@ class Picture
 		?int $height = null,
 		int $flag = Image::FIT,
 		?string $outputFormat = null,
-	): string {
+	): string
+	{
 		$url = new Url($file);
 		if ($outputFormat === null) {
 			$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
@@ -205,7 +206,7 @@ class Picture
 				}
 
 				$image->save($settings['file'], $quality, $type);
-			} catch (UnknownImageFileException|ImageException|InvalidArgumentException $e) {
+			} catch (UnknownImageFileException | ImageException | InvalidArgumentException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 		}
@@ -267,7 +268,7 @@ class Picture
 					$image->blurImage(10, 3);
 				}
 				$image->writeImage($settings['file']);
-			} catch (UnknownImageFileException|ImagickException|InvalidArgumentException|ImageException $e) {
+			} catch (UnknownImageFileException | ImagickException | InvalidArgumentException | ImageException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 		}
@@ -331,7 +332,8 @@ class Picture
 		?int $height = null,
 		int $flag = Image::FIT,
 		?string $outputFormat = null,
-	): bool {
+	): bool
+	{
 		$url = new Url($file);
 		if ($outputFormat === null) {
 			$extension = pathinfo($url->getPath(), PATHINFO_EXTENSION);
