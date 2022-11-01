@@ -23,7 +23,8 @@ use function Safe\ini_get;
  */
 class Picture
 {
-	private const MEMORY_RESERVE = 20; // MB
+	// MB
+	private const MEMORY_RESERVE = 20;
 
 	private bool $sharpenAfterResize = true;
 
