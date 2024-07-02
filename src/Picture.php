@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace JanuSoftware;
 
-use GdImage;
 use Imagick;
 use ImagickException;
 use Nette\Http\Url;
