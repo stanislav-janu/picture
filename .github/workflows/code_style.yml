@@ -18,6 +18,8 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-      - run: composer install --prefer-dist --prefer-lowest --no-progress --no-suggest
+      - uses: "ramsey/composer-install@v3"
+        with:
+          dependency-versions: "lowest"
       - run: composer create-project nette/coding-standard temp/coding-standard --no-progress
       - run: php temp/coding-standard/ecs check src tests --preset php82
