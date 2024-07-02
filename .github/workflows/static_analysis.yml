@@ -21,5 +21,4 @@ jobs:
       - uses: "ramsey/composer-install@v3"
         with:
           dependency-versions: "lowest"
-      - run: composer install --prefer-dist --prefer-lowest --no-progress --no-suggest
       - run: php vendor/bin/phpstan.phar analyse src
