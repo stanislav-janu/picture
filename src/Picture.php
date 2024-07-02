@@ -173,6 +173,7 @@ class Picture
 
 			try {
 				$image = Image::fromFile($mainFile);
+				// @phpstan-ignore-next-line
 				$image->resize($width, $height, $flag);
 
 				if ($this->sharpenAfterResize) {
@@ -180,7 +181,7 @@ class Picture
 				}
 
 				$resource = $image->getImageResource();
-				if (in_array($extension, ['jpg', 'jpeg'], true) && $resource instanceof GdImage) {
+				if (in_array($extension, ['jpg', 'jpeg'], true)) {
 					imageinterlace($resource, true);
 				} // Progressive JPEG
 
@@ -249,7 +250,7 @@ class Picture
 				$image = Image::fromFile($mainFile);
 
 				$resource = $image->getImageResource();
-				if (in_array($extension, ['jpg', 'jpeg'], true) && $resource instanceof GdImage) {
+				if (in_array($extension, ['jpg', 'jpeg'], true)) {
 					imageinterlace($resource, true);
 				} // Progressive JPEG
 
