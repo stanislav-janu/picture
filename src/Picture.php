@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JanuSoftware;
 
+use GdImage;
 use Imagick;
 use ImagickException;
 use Nette\Http\Url;
@@ -50,15 +51,15 @@ class Picture
 		string $extension,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::OrSmaller,
+		int $flag = Image::FIT,
 	): array
 	{
 		$prefixes = [
-			Image::Cover => 'e',
-			Image::OrSmaller => 'n',
-			Image::OrBigger => 'f',
-			Image::Stretch => 's',
-			Image::ShrinkOnly => 'so',
+			Image::EXACT => 'e',
+			Image::FIT => 'n',
+			Image::FILL => 'f',
+			Image::STRETCH => 's',
+			Image::SHRINK_ONLY => 'so',
 		];
 
 		$md5 = md5($file);
@@ -105,7 +106,7 @@ class Picture
 		string $file,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::OrSmaller,
+		int $flag = Image::FIT,
 		?string $outputFormat = null,
 	): string
 	{
@@ -147,15 +148,15 @@ class Picture
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 
-			if ($flag === Image::Cover && $width === null) {
+			if ($flag === Image::EXACT && $width === null) {
 				$width = $ow;
 			}
 
-			if ($flag === Image::Cover && $height === null) {
+			if ($flag === Image::EXACT && $height === null) {
 				$height = $oh;
 			}
 
-			if (($ow <= $width || $oh <= $height) && $flag !== Image::Cover) {
+			if (($ow <= $width || $oh <= $height) && $flag !== Image::EXACT) {
 				if ($isUrl) {
 					FileSystem::copy($file, $settings['file']);
 					return $settings['fileUri'];
@@ -172,7 +173,6 @@ class Picture
 
 			try {
 				$image = Image::fromFile($mainFile);
-				// @phpstan-ignore-next-line
 				$image->resize($width, $height, $flag);
 
 				if ($this->sharpenAfterResize) {
@@ -180,7 +180,7 @@ class Picture
 				}
 
 				$resource = $image->getImageResource();
-				if (in_array($extension, ['jpg', 'jpeg'], true)) {
+				if (in_array($extension, ['jpg', 'jpeg'], true) && $resource instanceof GdImage) {
 					imageinterlace($resource, true);
 				} // Progressive JPEG
 
@@ -249,7 +249,7 @@ class Picture
 				$image = Image::fromFile($mainFile);
 
 				$resource = $image->getImageResource();
-				if (in_array($extension, ['jpg', 'jpeg'], true)) {
+				if (in_array($extension, ['jpg', 'jpeg'], true) && $resource instanceof GdImage) {
 					imageinterlace($resource, true);
 				} // Progressive JPEG
 
@@ -331,7 +331,7 @@ class Picture
 		string $file,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::OrSmaller,
+		int $flag = Image::FIT,
 		?string $outputFormat = null,
 	): bool
 	{
