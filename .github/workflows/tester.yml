@@ -38,7 +38,7 @@ jobs:
         run: mysql -u root -proot -e 'CREATE DATABASE IF NOT EXISTS test;'
 
       - name: Composer install
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --prefer-lowest --no-progress --no-suggest
 
       - name: Run tests
         run: vendor/bin/tester tests -C -s
