@@ -3,7 +3,6 @@ Picture
 
 Helper for work with images.
 
-[![Composer](https://github.com/stanislav-janu/picture/actions/workflows/composer.yml/badge.svg)](https://github.com/stanislav-janu/picture/actions/workflows/composer.yml)
 [![Code style](https://github.com/stanislav-janu/picture/actions/workflows/code_style.yml/badge.svg)](https://github.com/stanislav-janu/picture/actions/workflows/code_style.yml)
 [![Tester](https://github.com/stanislav-janu/picture/actions/workflows/tester.yml/badge.svg)](https://github.com/stanislav-janu/picture/actions/workflows/tester.yml)
 [![PhpStan](https://github.com/stanislav-janu/picture/actions/workflows/static_analysis.yml/badge.svg)](https://github.com/stanislav-janu/picture/actions/workflows/static_analysis.yml)
