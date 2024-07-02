@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use Rector\Core\ValueObject\PhpVersion;
+use Rector\Config\RectorConfig;
+use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
-use Rector\TypeDeclaration\Rector\FunctionLike\ReturnTypeDeclarationRector;
 
 
-return static function (\Rector\Config\RectorConfig $rectorConfig): void {
+return static function (RectorConfig $rectorConfig): void {
 	// get parameters
 	$rectorConfig->paths([
 		__DIR__ . '/src',
@@ -19,11 +19,7 @@ return static function (\Rector\Config\RectorConfig $rectorConfig): void {
 	$rectorConfig->cacheDirectory(__DIR__ . '/temp/rector');
 
 	// Define what rule sets will be applied
-	$rectorConfig->import(SetList::PHP_80);
+	$rectorConfig->import(LevelSetList::UP_TO_PHP_82);
 	$rectorConfig->import(SetList::CODE_QUALITY);
-
-	$rectorConfig->phpVersion(PhpVersion::PHP_81);
-
-	$services = $rectorConfig->services();
-	$services->set(ReturnTypeDeclarationRector::class);
+	$rectorConfig->import(SetList::TYPE_DECLARATION);
 };

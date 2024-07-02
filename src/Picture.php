@@ -24,15 +24,15 @@ use function Safe\ini_get;
 class Picture
 {
 	// MB
-	private const MEMORY_RESERVE = 20;
+	private const MemoryReserve = 20;
 
 	private bool $sharpenAfterResize = true;
 
 
 	public function __construct(
-		private string $rootPath,
-		private string $reducedDir = '/thumbnails',
-		private string $blurredDir = '/blurred',
+		private readonly string $rootPath,
+		private readonly string $reducedDir = '/thumbnails',
+		private readonly string $blurredDir = '/blurred',
 	) {
 	}
 
@@ -51,15 +51,15 @@ class Picture
 		string $extension,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::FIT,
+		int $flag = Image::OrSmaller,
 	): array
 	{
 		$prefixes = [
-			Image::EXACT => 'e',
-			Image::FIT => 'n',
-			Image::FILL => 'f',
-			Image::STRETCH => 's',
-			Image::SHRINK_ONLY => 'so',
+			Image::Cover => 'e',
+			Image::OrSmaller => 'n',
+			Image::OrBigger => 'f',
+			Image::Stretch => 's',
+			Image::ShrinkOnly => 'so',
 		];
 
 		$md5 = md5($file);
@@ -106,7 +106,7 @@ class Picture
 		string $file,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::FIT,
+		int $flag = Image::OrSmaller,
 		?string $outputFormat = null,
 	): string
 	{
@@ -148,15 +148,15 @@ class Picture
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 
-			if ($flag === Image::EXACT && $width === null) {
+			if ($flag === Image::Cover && $width === null) {
 				$width = $ow;
 			}
 
-			if ($flag === Image::EXACT && $height === null) {
+			if ($flag === Image::Cover && $height === null) {
 				$height = $oh;
 			}
 
-			if (($ow <= $width || $oh <= $height) && $flag !== Image::EXACT) {
+			if (($ow <= $width || $oh <= $height) && $flag !== Image::Cover) {
 				if ($isUrl) {
 					FileSystem::copy($file, $settings['file']);
 					return $settings['fileUri'];
@@ -235,7 +235,7 @@ class Picture
 
 		if (!file_exists($settings['file'])) {
 			$mainFile = $this->rootPath . $file;
-			if (Strings::substring(Strings::lower($file), 0, 4) == 'http') {
+			if (Strings::substring(Strings::lower($file), 0, 4) === 'http') {
 				$mainFile = $file;
 			} elseif (!file_exists($mainFile)) {
 				throw new PictureException('File is not exists.');
@@ -305,7 +305,7 @@ class Picture
 			return false;
 		}
 
-		$memory_limit = 1024 * 1024 * ($imi - self::MEMORY_RESERVE);
+		$memory_limit = 1024 * 1024 * ($imi - self::MemoryReserve);
 		$constant = 3 * 1.8;
 
 		if ($nw !== null) {
@@ -331,7 +331,7 @@ class Picture
 		string $file,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::FIT,
+		int $flag = Image::OrSmaller,
 		?string $outputFormat = null,
 	): bool
 	{
