@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace JanuSoftware;
 
-use GdImage;
 use Imagick;
 use ImagickException;
 use Nette\Http\Url;
@@ -14,8 +13,10 @@ use Nette\Utils\Image;
 use Nette\Utils\ImageException;
 use Nette\Utils\Strings;
 use Nette\Utils\UnknownImageFileException;
+use Safe\Exceptions\FilesystemException;
 use function Safe\getimagesize;
 use function Safe\ini_get;
+use function Safe\tempnam;
 
 
 /**
@@ -24,7 +25,7 @@ use function Safe\ini_get;
 class Picture
 {
 	// MB
-	private const MemoryReserve = 20;
+	private const int MemoryReserve = 20;
 
 	private bool $sharpenAfterResize = true;
 
@@ -51,15 +52,15 @@ class Picture
 		string $extension,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::FIT,
+		int $flag = Image::OrSmaller,
 	): array
 	{
 		$prefixes = [
-			Image::EXACT => 'e',
-			Image::FIT => 'n',
-			Image::FILL => 'f',
-			Image::STRETCH => 's',
-			Image::SHRINK_ONLY => 'so',
+			Image::Cover => 'e',
+			Image::OrSmaller => 'n',
+			Image::OrBigger => 'f',
+			Image::Stretch => 's',
+			Image::ShrinkOnly => 'so',
 		];
 
 		$md5 = md5($file);
@@ -101,12 +102,13 @@ class Picture
 
 	/**
 	 * @throws PictureException
+	 * @param int<0, 15> $flag
 	 */
 	public function resize(
 		string $file,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::FIT,
+		int $flag = Image::OrSmaller,
 		?string $outputFormat = null,
 	): string
 	{
@@ -136,27 +138,33 @@ class Picture
 			$isUrl = false;
 			$mainFile = $this->rootPath . urldecode($file);
 			if (Strings::substring(Strings::lower($file), 0, 4) === 'http') {
-				$mainFile = $file;
+				$tmpFile = tempnam(sys_get_temp_dir(), 'picture_');
+				FileSystem::copy($file, $tmpFile);
+				$mainFile = $tmpFile;
 				$isUrl = true;
 			} elseif (!file_exists($mainFile)) {
 				throw new PictureException('File is not exists.');
 			}
 
 			try {
-				[$ow, $oh] = getimagesize($mainFile);
+				$getImageSize = getimagesize($mainFile);
+				if ($getImageSize === null) {
+					throw new PictureException('Image size could not be determined.');
+				}
+				[$ow, $oh] = $getImageSize;
 			} catch (\Safe\Exceptions\ImageException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 
-			if ($flag === Image::EXACT && $width === null) {
+			if ($flag === Image::Cover && $width === null) {
 				$width = $ow;
 			}
 
-			if ($flag === Image::EXACT && $height === null) {
+			if ($flag === Image::Cover && $height === null) {
 				$height = $oh;
 			}
 
-			if (($ow <= $width || $oh <= $height) && $flag !== Image::EXACT) {
+			if (($ow <= $width || $oh <= $height) && $flag !== Image::Cover) {
 				if ($isUrl) {
 					FileSystem::copy($file, $settings['file']);
 					return $settings['fileUri'];
@@ -180,7 +188,7 @@ class Picture
 				}
 
 				$resource = $image->getImageResource();
-				if (in_array($extension, ['jpg', 'jpeg'], true) && $resource instanceof GdImage) {
+				if (in_array($extension, ['jpg', 'jpeg'], true)) {
 					imageinterlace($resource, true);
 				} // Progressive JPEG
 
@@ -207,7 +215,7 @@ class Picture
 				}
 
 				$image->save($settings['file'], $quality, $type);
-			} catch (UnknownImageFileException | ImageException | InvalidArgumentException $e) {
+			} catch (UnknownImageFileException | ImageException | InvalidArgumentException | FilesystemException $e) {
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 		}
@@ -249,7 +257,7 @@ class Picture
 				$image = Image::fromFile($mainFile);
 
 				$resource = $image->getImageResource();
-				if (in_array($extension, ['jpg', 'jpeg'], true) && $resource instanceof GdImage) {
+				if (in_array($extension, ['jpg', 'jpeg'], true)) {
 					imageinterlace($resource, true);
 				} // Progressive JPEG
 
@@ -281,7 +289,7 @@ class Picture
 	/**
 	 * @throws PictureException
 	 */
-	public static function canResize(int $ow, int $oh, int $nw = null, int $nh = null, bool $throws = false): bool
+	public static function canResize(int $ow, int $oh, ?int $nw = null, ?int $nh = null, bool $throws = false): bool
 	{
 		if ($nw === null && $nh === null) {
 			if ($throws) {
@@ -331,7 +339,7 @@ class Picture
 		string $file,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::FIT,
+		int $flag = Image::OrSmaller,
 		?string $outputFormat = null,
 	): bool
 	{

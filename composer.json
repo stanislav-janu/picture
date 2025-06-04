@@ -10,12 +10,12 @@
 		}
 	],
 	"require": {
-		"php": ">=8.2",
+		"php": ">=8.3",
 		"ext-gd": "*",
 
 		"nette/http": "^3",
 		"nette/utils": "^3.2 || ^4",
-		"thecodingmachine/safe": "^2"
+		"thecodingmachine/safe": "^3"
 	},
 	"suggest": {
 		"ext-imagick": "to use Picture::blur()"
@@ -28,13 +28,13 @@
 		"re": "vendor/bin/rector process --config rector.php --dry-run --ansi",
 		"re-f": "vendor/bin/rector process --config rector.php --ansi",
 		"cs-i": "rm -rf temp/nette-coding-standard && composer create-project nette/coding-standard temp/nette-coding-standard",
-		"cs": "PHP_CS_FIXER_IGNORE_ENV=1 php -d memory_limit=512M temp/nette-coding-standard/ecs check src tests --preset php82",
-		"cs-f": "PHP_CS_FIXER_IGNORE_ENV=1 php -d memory_limit=512M temp/nette-coding-standard/ecs check src tests --preset php82 --fix"
+		"cs": "PHP_CS_FIXER_IGNORE_ENV=1 php -d memory_limit=512M temp/nette-coding-standard/ecs check src tests --preset php83",
+		"cs-f": "PHP_CS_FIXER_IGNORE_ENV=1 php -d memory_limit=512M temp/nette-coding-standard/ecs check src tests --preset php83 --fix"
 	},
 	"require-dev": {
-		"stanislav-janu/phpstan": "^1.0",
+		"stanislav-janu/phpstan": "^2.0",
 		"nette/tester": "^2.5",
-		"rector/rector": "^1.2"
+		"rector/rector": "^2"
 	},
 	"autoload": {
 		"classmap": ["src/"]
@@ -42,7 +42,7 @@
 	"minimum-stability": "stable",
 	"extra": {
 		"branch-alias": {
-			"dev-master": "3.0-dev"
+			"dev-master": "4.0-dev"
 		}
 	}
 }
