@@ -2,7 +2,7 @@ name: Code checks
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, v3 ]
   pull_request: null
 
 jobs:
