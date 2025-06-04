@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace JanuSoftware;
 
-use GdImage;
 use Imagick;
 use ImagickException;
 use Nette\Http\Url;
@@ -16,6 +15,7 @@ use Nette\Utils\Strings;
 use Nette\Utils\UnknownImageFileException;
 use function Safe\getimagesize;
 use function Safe\ini_get;
+use function Safe\tempnam;
 
 
 /**
@@ -51,15 +51,15 @@ class Picture
 		string $extension,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::FIT,
+		int $flag = Image::OrSmaller,
 	): array
 	{
 		$prefixes = [
-			Image::EXACT => 'e',
-			Image::FIT => 'n',
-			Image::FILL => 'f',
-			Image::STRETCH => 's',
-			Image::SHRINK_ONLY => 'so',
+			Image::Cover => 'e',
+			Image::OrSmaller => 'n',
+			Image::OrBigger => 'f',
+			Image::Stretch => 's',
+			Image::ShrinkOnly => 'so',
 		];
 
 		$md5 = md5($file);
@@ -100,13 +100,14 @@ class Picture
 
 
 	/**
+	 * @param int<0, 15> $flag
 	 * @throws PictureException
 	 */
 	public function resize(
 		string $file,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::FIT,
+		int $flag = Image::OrSmaller,
 		?string $outputFormat = null,
 	): string
 	{
@@ -123,7 +124,7 @@ class Picture
 		$extension = Strings::lower($extension);
 
 		if ($width === null && $height === null) {
-			throw new PictureException('Must be filled width or height parameter.');
+			throw new PictureException('Must be OrBiggered width or height parameter.');
 		}
 
 		if (!in_array($extension, ['jpg', 'png', 'jpeg', 'webp', 'gif', 'jfif'], true)) {
@@ -136,7 +137,8 @@ class Picture
 			$isUrl = false;
 			$mainFile = $this->rootPath . urldecode($file);
 			if (Strings::substring(Strings::lower($file), 0, 4) === 'http') {
-				$mainFile = $file;
+				$mainFile = tempnam(sys_get_temp_dir(), 'picture_');
+				FileSystem::copy($file, $mainFile);
 				$isUrl = true;
 			} elseif (!file_exists($mainFile)) {
 				throw new PictureException('File is not exists.');
@@ -148,15 +150,15 @@ class Picture
 				throw new PictureException($e->getMessage(), 0, $e);
 			}
 
-			if ($flag === Image::EXACT && $width === null) {
+			if ($flag === Image::Cover && $width === null) {
 				$width = $ow;
 			}
 
-			if ($flag === Image::EXACT && $height === null) {
+			if ($flag === Image::Cover && $height === null) {
 				$height = $oh;
 			}
 
-			if (($ow <= $width || $oh <= $height) && $flag !== Image::EXACT) {
+			if (($ow <= $width || $oh <= $height) && $flag !== Image::Cover) {
 				if ($isUrl) {
 					FileSystem::copy($file, $settings['file']);
 					return $settings['fileUri'];
@@ -180,7 +182,7 @@ class Picture
 				}
 
 				$resource = $image->getImageResource();
-				if (in_array($extension, ['jpg', 'jpeg'], true) && $resource instanceof GdImage) {
+				if (in_array($extension, ['jpg', 'jpeg'], true)) {
 					imageinterlace($resource, true);
 				} // Progressive JPEG
 
@@ -249,7 +251,7 @@ class Picture
 				$image = Image::fromFile($mainFile);
 
 				$resource = $image->getImageResource();
-				if (in_array($extension, ['jpg', 'jpeg'], true) && $resource instanceof GdImage) {
+				if (in_array($extension, ['jpg', 'jpeg'], true)) {
 					imageinterlace($resource, true);
 				} // Progressive JPEG
 
@@ -281,11 +283,11 @@ class Picture
 	/**
 	 * @throws PictureException
 	 */
-	public static function canResize(int $ow, int $oh, int $nw = null, int $nh = null, bool $throws = false): bool
+	public static function canResize(int $ow, int $oh, ?int $nw = null, ?int $nh = null, bool $throws = false): bool
 	{
 		if ($nw === null && $nh === null) {
 			if ($throws) {
-				throw new PictureException('Must be filled width or height parameter.');
+				throw new PictureException('Must be OrBiggered width or height parameter.');
 			}
 
 			return false;
@@ -331,7 +333,7 @@ class Picture
 		string $file,
 		?int $width = null,
 		?int $height = null,
-		int $flag = Image::FIT,
+		int $flag = Image::OrSmaller,
 		?string $outputFormat = null,
 	): bool
 	{
