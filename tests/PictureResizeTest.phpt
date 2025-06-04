@@ -23,16 +23,16 @@ Assert::false($picture->isResize($file, 128));
 Assert::same('/thumbnails/128x/3/n_733f3cd53bde51b539fc7be934aa764a.jpg', $picture->resize($file, 128));
 Assert::true($picture->isResize($file, 128));
 
-Assert::false($picture->isResize($file, 256, 2, Image::Cover));
-Assert::same('/thumbnails/256x2/3/e_733f3cd53bde51b539fc7be934aa764a.jpg', $picture->resize($file, 256, 2, Image::Cover));
-Assert::true($picture->isResize($file, 256, 2, Image::Cover));
+Assert::false($picture->isResize($file, 256, 2, Image::EXACT));
+Assert::same('/thumbnails/256x2/3/e_733f3cd53bde51b539fc7be934aa764a.jpg', $picture->resize($file, 256, 2, Image::EXACT));
+Assert::true($picture->isResize($file, 256, 2, Image::EXACT));
 
 Assert::false($picture->isResize($file, null, 128));
 Assert::same('/thumbnails/x128/3/n_733f3cd53bde51b539fc7be934aa764a.jpg', $picture->resize($file, null, 128));
 Assert::true($picture->isResize($file, null, 128));
 
-Assert::false($picture->isResize($file, null, 128, Image::OrSmaller, 'webp'));
-Assert::same('/thumbnails/x128/3/n_733f3cd53bde51b539fc7be934aa764a.webp', $picture->resize($file, null, 128, Image::OrSmaller, 'webp'));
-Assert::true($picture->isResize($file, null, 128, Image::OrSmaller, 'webp'));
+Assert::false($picture->isResize($file, null, 128, Image::FIT, 'webp'));
+Assert::same('/thumbnails/x128/3/n_733f3cd53bde51b539fc7be934aa764a.webp', $picture->resize($file, null, 128, Image::FIT, 'webp'));
+Assert::true($picture->isResize($file, null, 128, Image::FIT, 'webp'));
 
 FileSystem::delete(__DIR__ . '/pictures/thumbnails');
