@@ -239,7 +239,8 @@ class Picture
 		if (!file_exists($settings['file'])) {
 			$mainFile = $this->rootPath . $file;
 			if (Strings::substring(Strings::lower($file), 0, 4) === 'http') {
-				$mainFile = $file;
+				$mainFile = tempnam(sys_get_temp_dir(), 'picture_');
+				FileSystem::copy($file, $mainFile);
 			} elseif (!file_exists($mainFile)) {
 				throw new PictureException('File is not exists.');
 			}
